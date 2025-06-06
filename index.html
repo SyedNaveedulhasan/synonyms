@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synonyms Activity</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url(bg.png);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .heading {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #6a1b9a;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background:#8e599c;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .button:hover {
+            background: #8d5daa;
+            transform: scale(1.1);
+        }
+
+        .content {
+            display: none;
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: #666;
+        }
+
+        .next-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            background: #8e599c;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .next-button:hover {
+            background: #8d5daa;
+            transform: scale(1.1);
+        }
+        
+.rotating-text {
+    position: absolute;
+    top: 1%;
+    left: 2%;
+    font-size: 4rem;
+    font-weight: bold;
+    color: red;
+    animation: rotate 5s linear infinite;
+    font-family: 'Times New Roman', serif;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotateY(0deg);
+    }
+    to {
+        transform: rotateY(360deg);
+    }
+}
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div class="rotating-text">Tec</div>
+
+    <div class="container">
+        <div class="heading">Synonyms</div>
+        <button class="button" onclick="showContent()">Start</button>
+        <div class="content">
+            <p><strong>Definition:</strong> Synonyms are words or phrases that have the same or nearly the same meaning as another word or phrase.</p>
+            <p><strong>Examples:</strong> Happy - Joyful, Sad - Unhappy, Quick - Fast</p>
+            <button class="next-button" onclick="goToNextPage()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        gsap.from(".heading", {
+            duration: 2,
+            opacity: 0,
+            y: -50,
+            ease: "bounce.out"
+        });
+
+        function showContent() {
+            const button = document.querySelector(".button");
+            const content = document.querySelector(".content");
+            const nextButton = document.querySelector(".next-button");
+
+            button.style.display = "none";
+            content.style.display = "block";
+
+            gsap.from(".content", {
+                duration: 1,
+                opacity: 0,
+                y: 50,
+                ease: "power2.out"
+            });
+
+            nextButton.style.display = "inline-block";
+        }
+
+        function goToNextPage() {
+            window.location.href = "synonyms.html";
+        }
+    </script>
+</body>
+</html>

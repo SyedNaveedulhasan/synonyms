@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Synonym Explorer Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background: url(bg.png);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .game-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #ddcce6;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        width: 600px;
+        text-align: center;
+        position: relative;
+        max-height: 90vh;
+        overflow: hidden;
+      }
+
+      .game-title {
+        color: #6a11cb;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+
+      .game-image {
+        background-color: #ffffff;
+        max-width: 400px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .instruction {
+        color: #666;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+      }
+
+      .synonym-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        width: 100%;
+      }
+
+      .synonym-box {
+        background-color: #f0f0f0;
+        font-size: 20px;
+        padding: 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        width: 200px;
+        box-sizing: border-box;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .synonym-box:hover {
+        transform: scale(1.05);
+      }
+
+      .synonym-box.correct {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .synonym-box.incorrect {
+        background-color: #ff5252;
+        color: white;
+        animation: shake 0.5s;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+          transform: translateX(-5px);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+          transform: translateX(5px);
+        }
+      }
+
+      .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background-color: #6a11cb;
+        transform-origin: left;
+      }
+
+      .final-screen {
+        font-weight: bold;
+        color: #666;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .final-screen h2 {
+        margin: 0;
+        padding: 0;
+        color: #ffd166;
+        font-size: 2.5rem;
+      }
+
+      .finish-btn {
+        background-color: #6a11cb;
+        color: #fff;
+        border: none;
+        font-size: 1rem;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .finish-btn:hover {
+        background-color: #5a0fb8;
+      }
+
+      
+.rotating-text {
+    position: absolute;
+    top: 1%;
+    left: 2%;
+    font-size: 4rem;
+    font-weight: bold;
+    color: red;
+    animation: rotate 5s linear infinite;
+    font-family: 'Times New Roman', serif;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotateY(0deg);
+    }
+    to {
+        transform: rotateY(360deg);
+    }
+}
+    </style>
+  </head>
+  <body>
+    <div class="rotating-text">Tec</div>
+
+    <div class="game-container">
+      <div class="progress-bar" id="progressBar"></div>
+      <div class="game-content" id="gameContent">
+        <h1 class="game-title" id="wordTitle">Synonym Explorer</h1>
+        <img
+          id="gameImage"
+          class="game-image"
+          src="/api/placeholder/400/300"
+          alt="Game Image"
+        />
+        <div class="instruction" id="instruction">
+          Select synonyms related to the word
+        </div>
+        <div class="synonym-grid" id="synonymGrid"></div>
+      </div>
+      <div class="final-screen" id="finalScreen">
+        <h2>Congratulations!</h2>
+        <p>You've completed all the Synonyms Correctly!</p>
+        <button class="finish-btn" onclick="restartGame()">Finish</button>
+      </div>
+    </div>
+
+    <script>
+      var gameData = [
+        {
+          word: "Happy",
+          image: "happy.png",
+          synonyms: {
+            correct: ["Joyful"],
+            incorrect: ["Sad", "Miserable", "Depressed",],
+          },
+        },
+        {
+          word: "Hate",
+          image: "hate.png",
+          synonyms: {
+            correct: ["Dislike"],
+            incorrect: ["Love", "Cherish", "Appreciate"],
+          },
+        },
+        {
+          word: "Beautiful",
+          image: "beautiful.png",
+          synonyms: {
+            correct: ["Gorgeous"],
+            incorrect: ["Ugly", "Plain", "Dull"],
+          },
+        },
+        {
+          word: "Brilliant",
+          image: "smart.png",
+          synonyms: {
+            correct: ["Intelligent"],
+            incorrect: ["Foolish", "Stupid", "Dumb"],
+          },
+        },
+        {
+          word: "Brave",
+          image: "brave.png",
+          synonyms: {
+            correct: ["Fearless"],
+            incorrect: ["Cowardly","Scared", "Weak"],
+          },
+        },
+      ];
+
+      var currentRound = 0;
+      var selectedSynonyms = [];
+
+      function setupRound() {
+        var round = gameData[currentRound];
+
+        gsap.from("#wordTitle", {
+          duration: 0.7,
+          y: -50,
+          opacity: 0,
+          ease: "back.out(1.7)",
+        });
+
+        gsap.to("#progressBar", {
+          scaleX: (currentRound + 1) / gameData.length,
+          duration: 0.5,
+          ease: "power1.inOut",
+        });
+
+        document.getElementById("wordTitle").innerHTML =
+          round.word;
+        document.getElementById("gameImage").src = round.image;
+        document.getElementById("instruction").innerHTML =
+          'Select synonyms related to "' + round.word + '"';
+
+        var synonymGrid = document.getElementById("synonymGrid");
+        synonymGrid.innerHTML = "";
+
+        var allSynonyms = round.synonyms.correct.concat(
+          round.synonyms.incorrect
+        );
+        allSynonyms.sort(function () {
+          return 0.5 - Math.random();
+        });
+
+        for (var i = 0; i < allSynonyms.length; i++) {
+          var synonym = allSynonyms[i];
+          var synonymBox = document.createElement("div");
+          synonymBox.className = "synonym-box";
+          synonymBox.innerHTML = synonym;
+          synonymBox.setAttribute("data-synonym", synonym);
+          synonymBox.onclick = function () {
+            handleSynonymClick(
+              this.getAttribute("data-synonym"),
+              round.synonyms.correct.indexOf(
+                this.getAttribute("data-synonym")
+              ) !== -1
+            );
+          };
+          synonymGrid.appendChild(synonymBox);
+
+          gsap.from(synonymBox, {
+            duration: 0.5,
+            scale: 0.5,
+            opacity: 0,
+            ease: "back.out(1.7)",
+          });
+        }
+      }
+
+      function handleSynonymClick(synonym, isCorrect) {
+        var clickedBox = document.querySelector(
+          '.synonym-box[data-synonym="' + synonym + '"]'
+        );
+
+        if (isCorrect) {
+          clickedBox.classList.add("correct");
+          gsap.to(clickedBox, {
+            scale: 1.1,
+            duration: 0.3,
+            onComplete: function () {
+              selectedSynonyms.push(synonym);
+              checkRoundCompletion();
+            },
+          });
+        } else {
+          clickedBox.classList.add("incorrect");
+          setTimeout(function () {
+            clickedBox.classList.remove("incorrect");
+          }, 500);
+        }
+      }
+
+      function checkRoundCompletion() {
+        var currentGameData = gameData[currentRound];
+        if (
+          selectedSynonyms.length === currentGameData.synonyms.correct.length
+        ) {
+          currentRound++;
+          selectedSynonyms = [];
+
+          if (currentRound < gameData.length) {
+            setTimeout(setupRound, 1000);
+          } else {
+            showFinalScreen();
+          }
+        }
+      }
+
+      function showFinalScreen() {
+        document.getElementById("gameContent").style.display = "none";
+        var finalScreen = document.getElementById("finalScreen");
+        finalScreen.style.display = "flex";
+
+        gsap.from(finalScreen, {
+          duration: 1,
+          scale: 0.5,
+          opacity: 0,
+          ease: "elastic.out(1, 0.3)",
+        });
+
+          // Trigger confetti animation
+          confetti({
+          particleCount: 200,
+          spread: 100,
+          origin: { y: 0.6 },
+        });
+      }
+
+      function restartGame() {
+        window.location.reload();
+      }
+      
+      setupRound();
+    </script>
+  </body>
+</html>
